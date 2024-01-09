@@ -79,6 +79,32 @@ class NewsletterByID(Resource):
         )
 
         return response
+    
+    def patch(self, id):
+        nltr = Newsletter.query.filter_by(id=id).first();
+        if (nltr == None):
+            return make_response(f"404 Error: Newsletter with id {id} not found!", 404);
+        
+        if (0 < len(request.form)):
+            for attr in request.form:
+                setattr(nltr, attr, request.form.get(attr));
+        else:
+            for attr in request.json:
+                setattr(nltr, attr, request.json[attr]);
+        
+        db.session.add(nltr);
+        db.session.commit();
+        
+        return make_response(nltr.to_dict(), 200);
+
+    def delete(self, id):
+        nltr = Newsletter.query.filter_by(id=id).first();
+        if (nltr == None):
+            return make_response(f"404 Error: Newsletter with id {id} not found!", 404);
+        db.session.delete(nltr);
+        db.session.commit();
+        return make_response({"message": "record successfully deleted"}, 200);
+
 
 api.add_resource(NewsletterByID, '/newsletters/<int:id>')
 
